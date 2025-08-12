@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-12 22:55:31.654048",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cash_payment_tab",
+  "default_cash_payment_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "cash_payment_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cash Payment"
+  },
+  {
+   "fieldname": "default_cash_payment_account",
+   "fieldtype": "Link",
+   "label": "Default Cash Payment Account",
+   "options": "Account"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-08-12 22:57:22.299984",
+ "modified_by": "Administrator",
+ "module": "Erpnext Utils",
+ "name": "Voucher Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

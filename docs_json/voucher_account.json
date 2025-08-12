@@ -1,0 +1,54 @@
+{
+    "doctype": "DocType",
+    "name": "Voucher Account",
+    "module": "Erpnext Utils",
+    "istable": 1,
+    "fields": [
+      {
+        "fieldname": "account",
+        "fieldtype": "Link",
+        "label": "Account",
+        "options": "Account",
+        "reqd": 1,
+        "in_list_view": 1,
+        "columns":2
+      },
+      {
+        "fieldname": "party_type",
+        "fieldtype": "Link",
+        "label": "Party Type",
+        "options": "Party Type",
+        "in_list_view": 1,
+        "columns":1
+      },
+      {
+        "fieldname": "party",
+        "fieldtype": "Dynamic Link",
+        "label": "Party",
+        "options": "party_type",
+        "in_list_view": 1,
+        "columns":2
+      },
+      {
+        "fieldname": "narration",
+        "fieldtype": "Small Text",
+        "label": "Narration",
+        "columns":3
+      },
+      {
+        "fieldname": "debit",
+        "fieldtype": "Currency",
+        "label": "Debit",
+        "depends_on": "eval:doc.parenttype=='Cash Payment Voucher'||doc.parenttype=='Bank Payment Voucher'",
+        "columns":1
+      },
+      {
+        "fieldname": "credit",
+        "fieldtype": "Currency",
+        "label": "Credit",
+        "depends_on": "eval:doc.parenttype=='Cash Receipt Voucher'||doc.parenttype=='Bank Receipt Voucher'",
+        "columns":1
+      }
+    ]
+  }
+  

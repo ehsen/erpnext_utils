@@ -1,0 +1,42 @@
+{
+    "doctype": "DocType",
+    "name": "Cash Receipt Voucher",
+    "module": "Accounts",
+    "custom": 1,
+    "is_submittable": 1,
+    "fields": [
+      {
+        "fieldname": "posting_date",
+        "label": "Posting Date",
+        "fieldtype": "Date",
+        "default": "Today",
+        "reqd": 1
+      },
+      {
+        "fieldname": "company",
+        "label": "Company",
+        "fieldtype": "Link",
+        "options": "Company",
+        "reqd": 1
+      },
+      {
+        "fieldname": "remarks",
+        "label": "Remarks",
+        "fieldtype": "Data",
+        "reqd": 1
+      },
+      {
+        "fieldname": "accounts",
+        "label": "Accounts",
+        "fieldtype": "Table",
+        "options": "Voucher Account"
+      },
+      {
+        "fieldname": "total_receipt",
+        "label": "Total Receipt",
+        "fieldtype": "Currency",
+        "read_only": 1
+      }
+    ]
+  }
+  
