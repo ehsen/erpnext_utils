@@ -1,0 +1,73 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"shortcuts_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Voucher Shortcuts</b></span>\",\"col\":12}},{\"id\":\"cash_payment_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cash Payment Voucher\",\"col\":3}},{\"id\":\"bank_payment_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bank Payment Voucher\",\"col\":3}},{\"id\":\"cash_receipt_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cash Receipt Voucher\",\"col\":3}},{\"id\":\"bank_receipt_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bank Receipt Voucher\",\"col\":3}}]",
+ "creation": "2024-01-01 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "receipt",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "Voucher",
+ "links": [
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cash Payment Voucher",
+   "link_count": 0,
+   "link_to": "Cash Payment Voucher",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bank Payment Voucher",
+   "link_count": 0,
+   "link_to": "Bank Payment Voucher",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cash Receipt Voucher",
+   "link_count": 0,
+   "link_to": "Cash Receipt Voucher",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bank Receipt Voucher",
+   "link_count": 0,
+   "link_to": "Bank Receipt Voucher",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "ERPNext Utils",
+ "name": "Voucher",
+ "owner": "Administrator",
+ "parent_page": "",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "public": 1,
+ "restrict_to_domain": "",
+ "sequence_id": 0,
+ "title": "Voucher"
+}

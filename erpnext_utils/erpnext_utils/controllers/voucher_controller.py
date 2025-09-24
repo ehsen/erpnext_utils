@@ -3,171 +3,257 @@ from frappe.utils import nowdate,flt
 from erpnext import get_default_cost_center
 
 
-def get_voucher_accounts_total(doc,total_type="debit"):
+def get_voucher_accounts_total(doc):
     """
-    Get the total of the accounts in the voucher.
+    Get the total amount of the accounts in the voucher.
     :param doc: The voucher document.
-    :param total_type: The type of total to get.
-    :return: The total of the accounts in the voucher.
+    :return: The total amount of the accounts in the voucher.
     """
     total = 0
     for account in doc.accounts:
-        if total_type == "debit":
-            total += account.debit
-        else:
-            total += account.credit
+        total += account.amount
     return total
+
+def get_against_account_str(accounts):
+    against_account = ",".join(acc.account for acc in accounts)
+        
     
-def create_gl_entries(posting_date, accounts, company, voucher_type=None, voucher_account=None, 
-                      voucher_doctype=None):
+def create_gl_entries(
+    posting_date,
+    accounts,
+    company,
+    voucher_type=None,
+    voucher_account=None,
+    voucher_doctype=None,
+    voucher_no=None
+):
     """
     Create GL Entries in ERPNext.
-
-    :param posting_date: Date for the GL Entries (e.g., '2024-12-07').
-    :param accounts: List of account details (each dict with account, debit, credit, and cost_center if needed).
-                     Example:
-                     [
-                         {"account": "Debtors - CO", "debit": 1000, "credit": 0},
-                         {"account": "Sales - CO", "debit": 0, "credit": 1000},
-                     ]
-    :param company: Company for the GL Entries.
-    :param voucher_type: Type of the voucher (e.g., 'Payment', 'Receipt', 'Journal Entry').
-                         For Payment vouchers: All debits are individual entries, credit is one consolidated entry.
-                         For Receipt vouchers: All credits are individual entries, debit is one consolidated entry.
-    :param voucher_account: The main cash/bank account for the voucher (e.g., 'Cash - CO', 'Bank - CO').
-                           This account will be credited for Payment vouchers and debited for Receipt vouchers.
-    :return: List of GL Entry names or an error message.
     """
-    
-    
 
-    # Prepare GL Entry details
     gl_entries = []
-    
+
     if voucher_type == "Payment":
-        # For Payment vouchers: individual debit entries + one consolidated credit entry
-        total_debit = sum(acc.get("debit", 0) for acc in accounts)
-        
-        # Create individual debit entries
+        total_amount = sum(acc.get("amount", 0) for acc in accounts)
+
         for acc in accounts:
-            if acc.get("debit", 0) > 0:
+            if acc.get("amount", 0) > 0:
                 gl_entry = frappe.new_doc("GL Entry")
                 gl_entry.posting_date = posting_date or nowdate()
                 gl_entry.account = acc.account
-                gl_entry.debit = acc.get("debit", 0)
+                gl_entry.debit = acc.get("amount", 0)  # For payment: amount = debit
                 gl_entry.credit = 0
                 gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
-                gl_entry.party_type = acc.get("party_type", None)
-                gl_entry.party = acc.get("party", None)
+                gl_entry.party_type = acc.get("party_type")
+                gl_entry.party = acc.get("party")
                 gl_entry.company = company
-                gl_entry.voucher_type = acc.get("voucher_type", voucher_type)
-                gl_entry.voucher_no = acc.get("voucher_no", None)
-                gl_entry.voucher_subtype = acc.get("voucher_subtype", None)
-                gl_entry.against = acc.get("against", None)
-                
+                gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
+                gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
+                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.against = voucher_account
+
                 try:
                     gl_entry.insert()
                     gl_entries.append(gl_entry)
                 except Exception as e:
                     frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
         
-        # Create one consolidated credit entry for voucher_account
         if voucher_account:
+            # Get against accounts for cash account GL entry
+            against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
+            
             gl_entry = frappe.new_doc("GL Entry")
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = 0
-            gl_entry.credit = total_debit
+            gl_entry.credit = total_amount  # For payment: cash account is credited
             gl_entry.cost_center = get_default_cost_center(company)
             gl_entry.party_type = None
             gl_entry.party = None
             gl_entry.company = company
-            gl_entry.voucher_type = voucher_type
-            gl_entry.voucher_no = None
-            gl_entry.voucher_subtype = None
-            gl_entry.against = None
-            
+            gl_entry.voucher_type = voucher_doctype or voucher_type
+            gl_entry.voucher_no = voucher_no
+            gl_entry.voucher_subtype = voucher_doctype
+            gl_entry.against = against_accounts
+
             try:
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
                 frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
-                
+
     elif voucher_type == "Receipt":
-        # For Receipt vouchers: individual credit entries + one consolidated debit entry
-        total_credit = sum(acc.get("credit", 0) for acc in accounts)
-        
-        # Create individual credit entries
+        total_amount = sum(acc.get("amount", 0) for acc in accounts)
+
         for acc in accounts:
-            if acc.get("credit", 0) > 0:
+            if acc.get("amount", 0) > 0:
                 gl_entry = frappe.new_doc("GL Entry")
                 gl_entry.posting_date = posting_date or nowdate()
-                gl_entry.account = acc["account"]
+                gl_entry.account = acc.account
                 gl_entry.debit = 0
-                gl_entry.credit = acc.get("credit", 0)
+                gl_entry.credit = acc.get("amount", 0)  # For receipt: amount = credit
                 gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
-                gl_entry.party_type = acc.get("party_type", None)
-                gl_entry.party = acc.get("party", None)
+                gl_entry.party_type = acc.get("party_type")
+                gl_entry.party = acc.get("party")
                 gl_entry.company = company
-                gl_entry.voucher_type = acc.get("voucher_type", voucher_type)
-                gl_entry.voucher_no = acc.get("voucher_no", None)
-                gl_entry.voucher_subtype = acc.get("voucher_subtype", None)
-                gl_entry.against = acc.get("against", None)
-                
+                gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
+                gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
+                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.against = voucher_account
+
                 try:
                     gl_entry.insert()
                     gl_entries.append(gl_entry)
                 except Exception as e:
                     frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
-        
-        # Create one consolidated debit entry for voucher_account
+
         if voucher_account:
+            # Get against accounts for cash account GL entry
+            against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
+            
             gl_entry = frappe.new_doc("GL Entry")
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
-            gl_entry.debit = total_credit
+            gl_entry.debit = total_amount  # For receipt: cash account is debited
             gl_entry.credit = 0
             gl_entry.cost_center = get_default_cost_center(company)
             gl_entry.party_type = None
             gl_entry.party = None
             gl_entry.company = company
-            gl_entry.voucher_type = voucher_type
-            gl_entry.voucher_no = None
-            gl_entry.voucher_subtype = None
-            gl_entry.against = None
-            
+            gl_entry.voucher_type = voucher_doctype or voucher_type
+            gl_entry.voucher_no = voucher_no
+            gl_entry.voucher_subtype = voucher_doctype
+            gl_entry.against = against_accounts
+
             try:
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
                 frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
-                
-    else:
-        # Default behavior for other voucher types (Journal Entry, etc.)
+
+    elif voucher_type == "Bank Payment":
+        total_amount = sum(acc.get("amount", 0) for acc in accounts)
+
         for acc in accounts:
+            if acc.get("amount", 0) > 0:
+                gl_entry = frappe.new_doc("GL Entry")
+                gl_entry.posting_date = posting_date or nowdate()
+                gl_entry.account = acc.account
+                gl_entry.debit = acc.get("amount", 0)  # For bank payment: amount = debit
+                gl_entry.credit = 0
+                gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
+                gl_entry.party_type = acc.get("party_type")
+                gl_entry.party = acc.get("party")
+                gl_entry.company = company
+                gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
+                gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
+                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.against = voucher_account
+
+                try:
+                    gl_entry.insert()
+                    gl_entries.append(gl_entry)
+                except Exception as e:
+                    frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+        
+        if voucher_account:
+            # Get against accounts for bank account GL entry
+            against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
+            
             gl_entry = frappe.new_doc("GL Entry")
             gl_entry.posting_date = posting_date or nowdate()
-            gl_entry.account = acc["account"]
-            gl_entry.debit = acc.get("debit", 0)
-            gl_entry.credit = acc.get("credit", 0)
-            gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
-            gl_entry.party_type = acc.get("party_type", None)
-            gl_entry.party = acc.get("party", None)
+            gl_entry.account = voucher_account
+            gl_entry.debit = 0
+            gl_entry.credit = total_amount  # For bank payment: bank account is credited
+            gl_entry.cost_center = get_default_cost_center(company)
+            gl_entry.party_type = None
+            gl_entry.party = None
             gl_entry.company = company
-            gl_entry.voucher_type = acc.get("voucher_type", voucher_type)
-            gl_entry.voucher_no = acc.get("voucher_no", None)
-            gl_entry.voucher_subtype = acc.get("voucher_subtype", None)
-            gl_entry.against = acc.get("against", None)
+            gl_entry.voucher_type = voucher_doctype or voucher_type
+            gl_entry.voucher_no = voucher_no
+            gl_entry.voucher_subtype = voucher_doctype
+            gl_entry.against = against_accounts
 
-            # Insert GL Entry one by one (instead of bulk insert)
             try:
-                gl_entry.insert()  # This will trigger validation and insert each entry individually
+                gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
                 frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
 
-    # Return the list of names of successfully inserted entries
+    elif voucher_type == "Bank Receipt":
+        total_amount = sum(acc.get("amount", 0) for acc in accounts)
+
+        for acc in accounts:
+            if acc.get("amount", 0) > 0:
+                gl_entry = frappe.new_doc("GL Entry")
+                gl_entry.posting_date = posting_date or nowdate()
+                gl_entry.account = acc.account
+                gl_entry.debit = 0
+                gl_entry.credit = acc.get("amount", 0)  # For bank receipt: amount = credit
+                gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
+                gl_entry.party_type = acc.get("party_type")
+                gl_entry.party = acc.get("party")
+                gl_entry.company = company
+                gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
+                gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
+                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.against = voucher_account
+
+                try:
+                    gl_entry.insert()
+                    gl_entries.append(gl_entry)
+                except Exception as e:
+                    frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+
+        if voucher_account:
+            # Get against accounts for bank account GL entry
+            against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
+            
+            gl_entry = frappe.new_doc("GL Entry")
+            gl_entry.posting_date = posting_date or nowdate()
+            gl_entry.account = voucher_account
+            gl_entry.debit = total_amount  # For bank receipt: bank account is debited
+            gl_entry.credit = 0
+            gl_entry.cost_center = get_default_cost_center(company)
+            gl_entry.party_type = None
+            gl_entry.party = None
+            gl_entry.company = company
+            gl_entry.voucher_type = voucher_doctype or voucher_type
+            gl_entry.voucher_no = voucher_no
+            gl_entry.voucher_subtype = voucher_doctype
+            gl_entry.against = against_accounts
+
+            try:
+                gl_entry.insert()
+                gl_entries.append(gl_entry)
+            except Exception as e:
+                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+
+    else:
+        for acc in accounts:
+            gl_entry = frappe.new_doc("GL Entry")
+            gl_entry.posting_date = posting_date or nowdate()
+            gl_entry.account = acc.account
+            gl_entry.debit = acc.get("debit", 0)
+            gl_entry.credit = acc.get("credit", 0)
+            gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
+            gl_entry.party_type = acc.get("party_type")
+            gl_entry.party = acc.get("party")
+            gl_entry.company = company
+            gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
+            gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
+            gl_entry.voucher_subtype = acc.get("voucher_subtype")
+            gl_entry.against = acc.get("against")
+
+            try:
+                gl_entry.insert()
+                gl_entries.append(gl_entry)
+            except Exception as e:
+                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+
     return [entry.name for entry in gl_entries]
+
+
 
 
 
@@ -186,13 +272,13 @@ def validate_account_row(row, row_idx):
         frappe.throw(f"Row {row_idx}: Account is mandatory")
 
     
-    # Validate debit amount
-    debit = flt(row.debit or 0)
-    if debit <= 0:
-        frappe.throw(f"Row {row_idx}: Debit amount must be greater than zero")
+    # Validate amount
+    amount = flt(row.amount or 0)
+    if amount <= 0:
+        frappe.throw(f"Row {row_idx}: Amount must be greater than zero")
     
-    if debit < 0:
-        frappe.throw(f"Row {row_idx}: Negative debit amount not allowed")
+    if amount < 0:
+        frappe.throw(f"Row {row_idx}: Negative amount not allowed")
     
     # Party validation - negative space programming
     if row.party_type and not row.party:
@@ -218,25 +304,22 @@ def validate_accounts_child_table(doc):
 
 def validate_accounting_equation(doc):
     """
-    Validate accounting equation for Cash Payment Voucher
+    Validate accounting equation for Cash Payment/Receipt Voucher
     For cash payment: Total Debits = Total Credits
+    For cash receipt: Total Debits = Total Credits
     """
     
     if not doc.accounts:
         return
     
-    # Calculate total debits from child table
-    total_debits = sum(flt(row.debit or 0) for row in doc.accounts)
+    # Calculate total amount from child table
+    total_amount = sum(flt(row.amount or 0) for row in doc.accounts)
     
-    # For cash payment voucher, we need a cash/bank credit entry
-    # This should either be in a separate field or implied
-    total_credits = total_debits
-    
-    if total_debits != total_credits:
-        frappe.throw(
-            
-            f"<b>Debits and Credits must equal in Voucher</b>"
-        )
+    # For both payment and receipt vouchers, the accounting equation must balance
+    # Payment: accounts debited, cash credited
+    # Receipt: accounts credited, cash debited
+    if total_amount <= 0:
+        frappe.throw(f"<b>Total amount must be greater than zero</b>")
 
 def create_single_gl_entry(doc, account, debit=0, credit=0, party_type=None, 
                           party=None, remarks="", against_account=""):
@@ -271,5 +354,93 @@ def create_single_gl_entry(doc, account, debit=0, credit=0, party_type=None,
     except Exception as e:
         frappe.log_error(f"GL Entry creation failed: {str(e)}", "GL Entry Error")
         frappe.throw(f"Failed to create GL Entry for account {account}: {str(e)}")
+
+
+def get_post_dated_cheque_account():
+    """Get the default post dated cheque account from Voucher Settings"""
+    try:
+        voucher_settings = frappe.get_single("Voucher Settings")
+        return voucher_settings.default_post_dated_cheque
+    except:
+        frappe.throw("Please set Default Post Dated Cheque Account in Voucher Settings")
+
+
+def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher_type, 
+                                       voucher_account, voucher_doctype, voucher_no, 
+                                       cheque_date, cheque_number):
+    """
+    Create GL entries for post dated cheques
+    For post dated cheques, the transaction hits the post dated cheque account instead of bank account
+    """
+    from frappe.utils import nowdate
+    
+    gl_entries = []
+    total_amount = sum(acc.get("amount", 0) for acc in accounts)
+    
+    # Get post dated cheque account
+    post_dated_account = get_post_dated_cheque_account()
+    
+    # Create entries for accounts (same as normal voucher)
+    for acc in accounts:
+        if acc.get("amount", 0) > 0:
+            gl_entry = frappe.new_doc("GL Entry")
+            gl_entry.posting_date = posting_date or nowdate()
+            gl_entry.account = acc.account
+            
+            if voucher_type in ["Bank Payment", "Payment"]:
+                gl_entry.debit = acc.get("amount", 0)
+                gl_entry.credit = 0
+            else:  # Bank Receipt, Receipt
+                gl_entry.debit = 0
+                gl_entry.credit = acc.get("amount", 0)
+            
+            gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
+            gl_entry.party_type = acc.get("party_type")
+            gl_entry.party = acc.get("party")
+            gl_entry.company = company
+            gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
+            gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
+            gl_entry.voucher_subtype = acc.get("voucher_subtype")
+            gl_entry.against = post_dated_account
+            gl_entry.remarks = f"Post Dated Cheque #{cheque_number} dated {cheque_date}"
+
+            try:
+                gl_entry.insert()
+                gl_entries.append(gl_entry)
+            except Exception as e:
+                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+    
+    # Create entry for post dated cheque account
+    if post_dated_account:
+        against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
+        
+        gl_entry = frappe.new_doc("GL Entry")
+        gl_entry.posting_date = posting_date or nowdate()
+        gl_entry.account = post_dated_account
+        
+        if voucher_type in ["Bank Payment", "Payment"]:
+            gl_entry.debit = 0
+            gl_entry.credit = total_amount
+        else:  # Bank Receipt, Receipt
+            gl_entry.debit = total_amount
+            gl_entry.credit = 0
+        
+        gl_entry.cost_center = get_default_cost_center(company)
+        gl_entry.party_type = None
+        gl_entry.party = None
+        gl_entry.company = company
+        gl_entry.voucher_type = voucher_doctype or voucher_type
+        gl_entry.voucher_no = voucher_no
+        gl_entry.voucher_subtype = voucher_doctype
+        gl_entry.against = against_accounts
+        gl_entry.remarks = f"Post Dated Cheque #{cheque_number} dated {cheque_date}"
+
+        try:
+            gl_entry.insert()
+            gl_entries.append(gl_entry)
+        except Exception as e:
+            frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+    
+    return [entry.name for entry in gl_entries]
 
 

@@ -10,8 +10,7 @@
   "party_type",
   "party",
   "narration",
-  "debit",
-  "credit"
+  "amount"
  ],
  "fields": [
     {
@@ -47,9 +46,9 @@
         "in_list_view": 1
       },
       {
-        "fieldname": "debit",
+        "fieldname": "amount",
         "fieldtype": "Currency",
-        "label": "Debit",
+        "label": "Amount",
         "columns":2,
         "in_list_view": 1
       }

@@ -8,7 +8,7 @@ from erpnext_utils.erpnext_utils.controllers.voucher_controller import (validate
 create_gl_entries)
 
 
-class CashPaymentVoucher(Document):
+class CashReceiptVoucher(Document):
 	pass
 
 	def validate(self):
@@ -16,12 +16,6 @@ class CashPaymentVoucher(Document):
 		validate_accounting_equation(self)
 		self.total_payment = sum(flt(row.amount or 0) for row in self.accounts)
 
-	
-
 	def on_submit(self):
-		create_gl_entries(self.posting_date,self.accounts,self.company,"Payment",
-					self.voucher_account,"Cash Payment Voucher",self.name)
-
-		
-		
-	
+		create_gl_entries(self.posting_date,self.accounts,self.company,"Receipt",
+					self.voucher_account,"Cash Receipt Voucher",self.name)

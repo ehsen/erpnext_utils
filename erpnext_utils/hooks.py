@@ -242,3 +242,13 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+# Fixtures
+fixtures = [
+    {
+        "dt": "Workspace",
+        "filters": [
+            ["module", "=", "ERPNext Utils"]
+        ]
+    }
+]
+
