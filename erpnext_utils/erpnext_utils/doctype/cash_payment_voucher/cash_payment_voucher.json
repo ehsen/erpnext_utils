@@ -29,14 +29,6 @@
    "reqd": 1
   },
   {
-   "default": "Today",
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Posting Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
