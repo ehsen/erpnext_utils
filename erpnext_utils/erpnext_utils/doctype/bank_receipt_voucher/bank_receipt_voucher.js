@@ -1,12 +1,12 @@
-frappe.ui.form.on('Cash Payment Voucher', {
+frappe.ui.form.on('Bank Receipt Voucher', {
     setup: function(frm) {
-        // Restrict account field to cash accounts only
+        // Restrict account field to bank accounts only
         frm.set_query('voucher_account', function() {
             return {
                 filters: {
-                    account_type: 'Cash',
+                    account_type: 'Bank',
                     is_group: 0,
-                    company:frm.doc.company
+                    company: frm.doc.company
                 }
             };
         });
@@ -14,13 +14,33 @@ frappe.ui.form.on('Cash Payment Voucher', {
 
     onload: function(frm) {
         // Set default only for new vouchers
-        if (frm.is_new() && !frm.doc.account) {
-            frappe.db.get_value('Voucher Settings', 'Voucher Settings', 'default_cash_payment_account')
+        if (frm.is_new() && !frm.doc.voucher_account) {
+            frappe.db.get_value('Voucher Settings', 'Voucher Settings', 'default_bank_receipt_account')
                 .then(r => {
-                    if (r && r.message && r.message.default_cash_payment_account) {
-                        frm.set_value('voucher_account', r.message.default_cash_payment_account);
+                    if (r && r.message && r.message.default_bank_receipt_account) {
+                        frm.set_value('voucher_account', r.message.default_bank_receipt_account);
                     }
                 });
+        }
+    },
+
+    cost_center: function(frm) {
+        // Auto-populate cost_center in all accounts child table rows
+        if (frm.doc.cost_center && frm.doc.accounts) {
+            frm.doc.accounts.forEach(function(row) {
+                frappe.model.set_value(row.doctype, row.name, 'cost_center', frm.doc.cost_center);
+            });
+            frm.refresh_field('accounts');
+        }
+    }
+});
+
+// Handle accounts child table events
+frappe.ui.form.on('Voucher Account', {
+    accounts_add: function(frm, cdt, cdn) {
+        // Auto-populate cost_center when new row is added
+        if (frm.doc.cost_center) {
+            frappe.model.set_value(cdt, cdn, 'cost_center', frm.doc.cost_center);
         }
     }
 });

@@ -22,5 +22,25 @@ frappe.ui.form.on('Cash Payment Voucher', {
                     }
                 });
         }
+    },
+
+    cost_center: function(frm) {
+        // Auto-populate cost_center in all accounts child table rows
+        if (frm.doc.cost_center && frm.doc.accounts) {
+            frm.doc.accounts.forEach(function(row) {
+                frappe.model.set_value(row.doctype, row.name, 'cost_center', frm.doc.cost_center);
+            });
+            frm.refresh_field('accounts');
+        }
+    }
+});
+
+// Handle accounts child table events
+frappe.ui.form.on('Voucher Account', {
+    accounts_add: function(frm, cdt, cdn) {
+        // Auto-populate cost_center when new row is added
+        if (frm.doc.cost_center) {
+            frappe.model.set_value(cdt, cdn, 'cost_center', frm.doc.cost_center);
+        }
     }
 });

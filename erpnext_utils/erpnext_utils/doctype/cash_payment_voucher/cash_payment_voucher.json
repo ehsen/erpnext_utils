@@ -10,10 +10,12 @@
   "company",
   "column_break_o3br",
   "voucher_account",
+  "cost_center",
   "import_document",
   "abbr",
   "column_break_ywqs",
   "section_break_uezx",
+  "paid_to",
   "remarks",
   "accounts",
   "total_payment",
@@ -104,12 +106,25 @@
    "label": "Cash Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "paid_to",
+   "fieldtype": "Link",
+   "label": "Paid To",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-24 11:42:28.854765",
+ "modified": "2025-09-25 11:38:37.585402",
  "modified_by": "Administrator",
  "module": "Erpnext Utils",
  "name": "Cash Payment Voucher",

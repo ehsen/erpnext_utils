@@ -10,6 +10,8 @@
   "column_break_o3br",
   "company",
   "voucher_account",
+  "gl_bank_account",
+  "cost_center",
   "instrument_type",
   "abbr",
   "column_break_ywqs",
@@ -58,6 +60,21 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gl_bank_account",
+   "fieldtype": "Link",
+   "label": "GL Bank Account",
+   "options": "Account",
+   "fetch_from": "voucher_account.account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
    "reqd": 1
   },
   {

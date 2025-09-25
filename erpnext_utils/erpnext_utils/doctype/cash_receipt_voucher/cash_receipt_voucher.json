@@ -7,9 +7,10 @@
  "field_order": [
   "naming_series",
   "posting_date",
-  "column_break_o3br",
   "company",
+  "column_break_o3br",
   "voucher_account",
+  "cost_center",
   "import_document",
   "abbr",
   "column_break_ywqs",
@@ -51,6 +52,13 @@
    "fieldtype": "Link",
    "label": "Cash Account",
    "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
    "reqd": 1
   },
   {
@@ -109,7 +117,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-23 15:13:18.134509",
+ "modified": "2025-09-25 12:15:13.134168",
  "modified_by": "Administrator",
  "module": "Erpnext Utils",
  "name": "Cash Receipt Voucher",

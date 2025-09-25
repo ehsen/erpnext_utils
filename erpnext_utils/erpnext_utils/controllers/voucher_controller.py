@@ -62,12 +62,19 @@ def create_gl_entries(
             # Get against accounts for cash account GL entry
             against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
             
+            # Get cost center from first account row if available, otherwise use default
+            voucher_cost_center = None
+            if accounts and accounts[0].get("cost_center"):
+                voucher_cost_center = accounts[0].get("cost_center")
+            else:
+                voucher_cost_center = get_default_cost_center(company)
+            
             gl_entry = frappe.new_doc("GL Entry")
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = 0
             gl_entry.credit = total_amount  # For payment: cash account is credited
-            gl_entry.cost_center = get_default_cost_center(company)
+            gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
             gl_entry.party = None
             gl_entry.company = company
@@ -111,12 +118,19 @@ def create_gl_entries(
             # Get against accounts for cash account GL entry
             against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
             
+            # Get cost center from first account row if available, otherwise use default
+            voucher_cost_center = None
+            if accounts and accounts[0].get("cost_center"):
+                voucher_cost_center = accounts[0].get("cost_center")
+            else:
+                voucher_cost_center = get_default_cost_center(company)
+            
             gl_entry = frappe.new_doc("GL Entry")
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = total_amount  # For receipt: cash account is debited
             gl_entry.credit = 0
-            gl_entry.cost_center = get_default_cost_center(company)
+            gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
             gl_entry.party = None
             gl_entry.company = company
@@ -160,12 +174,19 @@ def create_gl_entries(
             # Get against accounts for bank account GL entry
             against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
             
+            # Get cost center from first account row if available, otherwise use default
+            voucher_cost_center = None
+            if accounts and accounts[0].get("cost_center"):
+                voucher_cost_center = accounts[0].get("cost_center")
+            else:
+                voucher_cost_center = get_default_cost_center(company)
+            
             gl_entry = frappe.new_doc("GL Entry")
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = 0
             gl_entry.credit = total_amount  # For bank payment: bank account is credited
-            gl_entry.cost_center = get_default_cost_center(company)
+            gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
             gl_entry.party = None
             gl_entry.company = company
@@ -209,12 +230,19 @@ def create_gl_entries(
             # Get against accounts for bank account GL entry
             against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
             
+            # Get cost center from first account row if available, otherwise use default
+            voucher_cost_center = None
+            if accounts and accounts[0].get("cost_center"):
+                voucher_cost_center = accounts[0].get("cost_center")
+            else:
+                frappe.throw("Cost Center (Official or Out Of Books) is mandatory for all vouchers")
+            
             gl_entry = frappe.new_doc("GL Entry")
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = total_amount  # For bank receipt: bank account is debited
             gl_entry.credit = 0
-            gl_entry.cost_center = get_default_cost_center(company)
+            gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
             gl_entry.party = None
             gl_entry.company = company
@@ -258,6 +286,20 @@ def create_gl_entries(
 
 
 
+def populate_cost_center_in_accounts(doc):
+    """
+    Automatically populate cost_center field in accounts child table rows
+    from the main document's cost_center field.
+    """
+    if not doc.cost_center:
+        return
+    
+    if doc.accounts:
+        for account_row in doc.accounts:
+            if not account_row.cost_center:
+                account_row.cost_center = doc.cost_center
+
+
 def validate_account_row(row, row_idx):
     """Validate individual account row 
     
@@ -296,6 +338,9 @@ def validate_account_row(row, row_idx):
 
 def validate_accounts_child_table(doc):
     """Validate accounts child table rows"""
+    # First populate cost center from main document
+    populate_cost_center_in_accounts(doc)
+    
     if not doc.accounts:
         frappe.throw("At least one account entry is required")
     
@@ -414,6 +459,13 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
     if post_dated_account:
         against_accounts = ",".join(acc.account for acc in accounts if acc.get("amount", 0) > 0)
         
+        # Get cost center from first account row if available, otherwise use default
+        voucher_cost_center = None
+        if accounts and accounts[0].get("cost_center"):
+            voucher_cost_center = accounts[0].get("cost_center")
+        else:
+            voucher_cost_center = get_default_cost_center(company)
+        
         gl_entry = frappe.new_doc("GL Entry")
         gl_entry.posting_date = posting_date or nowdate()
         gl_entry.account = post_dated_account
@@ -425,7 +477,7 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
             gl_entry.debit = total_amount
             gl_entry.credit = 0
         
-        gl_entry.cost_center = get_default_cost_center(company)
+        gl_entry.cost_center = voucher_cost_center
         gl_entry.party_type = None
         gl_entry.party = None
         gl_entry.company = company
