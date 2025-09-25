@@ -26,6 +26,9 @@ class BankReceiptVoucher(Document):
 				frappe.throw("Party Type is mandatory when Instrument Type is Cheque")
 			if not self.party:
 				frappe.throw("Issued To (Party) is mandatory when Instrument Type is Cheque")
+			
+			# Validate and fetch correct cheque book
+			self.validate_and_fetch_cheque_book()
 
 	def on_submit(self):
 		# Create cheque record if instrument type is Cheque
@@ -53,16 +56,53 @@ class BankReceiptVoucher(Document):
 		cheque_doc = frappe.new_doc("Cheque")
 		cheque_doc.cheque_number = self.cheque_number
 		cheque_doc.cheque_date = self.cheque_date
-		cheque_doc.bank_account = self.voucher_account
 		cheque_doc.party_type = self.party_type
 		cheque_doc.party = self.party
 		cheque_doc.status = "Unpresented"
 		cheque_doc.amount = self.total_payment
 		
-		# Try to find and link the cheque book
-		cheque_book = frappe.db.get_value("Cheque Book", 
-			{"bank_account": self.voucher_account, "is_active": 1}, "name")
-		if cheque_book:
-			cheque_doc.cheque_book = cheque_book
+		# Use the validated cheque book
+		if hasattr(self, 'cheque_book_name') and self.cheque_book_name:
+			cheque_doc.cheque_book = self.cheque_book_name
+		else:
+			# Fallback: Try to find and link the cheque book
+			cheque_book = frappe.db.get_value("Cheque Book", 
+				{"account_title": self.voucher_account, "is_active": 1}, "name")
+			if cheque_book:
+				cheque_doc.cheque_book = cheque_book
 		
+		# The bank_account field will be automatically fetched from cheque_book.bank_account
+		# due to the fetch_from configuration in the Cheque DocType
 		cheque_doc.insert()
+
+	def validate_and_fetch_cheque_book(self):
+		"""Validate cheque number and fetch the correct cheque book"""
+		if not self.cheque_number or not self.voucher_account:
+			return
+		
+		# Find cheque book that matches the voucher account and contains the cheque number
+		cheque_book = frappe.db.get_value("Cheque Book", 
+			{
+				"account_title": self.voucher_account,
+				"is_active": 1,
+				"start_series": ["<=", self.cheque_number],
+				"end_series": [">=", self.cheque_number]
+			}, 
+			["name", "start_series", "end_series", "current_series"], 
+			as_dict=True
+		)
+		
+		if not cheque_book:
+			frappe.throw(f"No active cheque book found for account '{self.voucher_account}' containing cheque number '{self.cheque_number}'")
+		
+		# Check if cheque number is already used
+		existing_cheque = frappe.db.exists("Cheque", {
+			"cheque_number": self.cheque_number,
+			"cheque_book": cheque_book.name
+		})
+		
+		if existing_cheque:
+			frappe.throw(f"Cheque number '{self.cheque_number}' is already used in cheque book '{cheque_book.name}'")
+		
+		# Store the cheque book name for later use
+		self.cheque_book_name = cheque_book.name

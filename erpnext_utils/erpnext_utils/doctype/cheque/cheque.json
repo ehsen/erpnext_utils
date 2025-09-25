@@ -71,7 +71,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Unpresented\nCleared\nCancelled\nReturned",
+   "options": "Unused\nUnpresented\nCleared\nCancelled\nReturned\nDiscarded",
    "reqd": 1
   },
   {
