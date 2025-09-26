@@ -1,0 +1,61 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"aSa-L43HPI\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Accounting Vouchers</span>\",\"col\":12}},{\"id\":\"eIUn2UjFOy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\",\"col\":12}},{\"id\":\"r4rKgIcmOO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bank Receipt Voucher\",\"col\":3}},{\"id\":\"Bs3ky7PBtH\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bank Payment Voucher\",\"col\":3}},{\"id\":\"jret5TvUKN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cash Receipt Voucher\",\"col\":3}},{\"id\":\"maQWKdAHy-\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cash Payment Voucher\",\"col\":3}}]",
+ "creation": "2025-09-26 11:46:03.356204",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "yellow",
+ "is_hidden": 0,
+ "label": "Accounting Vouchers",
+ "links": [],
+ "modified": "2025-09-26 11:49:58.657051",
+ "modified_by": "Administrator",
+ "module": "Erpnext Utils",
+ "name": "Accounting Vouchers",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "Accounting",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 40.0,
+ "shortcuts": [
+  {
+   "color": "Orange",
+   "doc_view": "New",
+   "label": "Cash Receipt Voucher",
+   "link_to": "Cash Receipt Voucher",
+   "stats_filter": "[[\"Cash Receipt Voucher\",\"docstatus\",\"=\",\"1\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Bank Receipt Voucher",
+   "link_to": "Bank Receipt Voucher",
+   "stats_filter": "[[\"Bank Receipt Voucher\",\"docstatus\",\"=\",\"1\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "New",
+   "label": "Cash Payment Voucher",
+   "link_to": "Cash Payment Voucher",
+   "stats_filter": "[[\"Cash Payment Voucher\",\"docstatus\",\"=\",\"1\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "New",
+   "label": "Bank Payment Voucher",
+   "link_to": "Bank Payment Voucher",
+   "stats_filter": "[[\"Bank Payment Voucher\",\"docstatus\",\"=\",\"1\",false]]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Accounting Vouchers"
+}
