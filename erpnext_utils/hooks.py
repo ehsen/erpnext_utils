@@ -249,6 +249,18 @@ fixtures = [
         "filters": [
             ["module", "=", "ERPNext Utils"]
         ]
+    },
+    {
+        "dt": "Custom Field",  # DocType for the fixture
+        "filters": [
+            ["module", "=", "ERPNext Utils"]  # Only include fields from this module
+        ]
+    },
+     {
+        "dt": "Property Setter",  # DocType for the fixture
+        "filters": [
+            ["module", "=", "ERPNext Utils"]  # Only include fields from this module
+        ]
     }
 ]
 
