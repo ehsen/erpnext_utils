@@ -173,10 +173,11 @@ app_license = "mit"
 
 # Overriding Methods
 # ------------------------------
-#
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "erpnext_utils.event.get_events"
-# }
+
+override_whitelisted_methods = {
+	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "erpnext_utils.erpnext_utils.overrides.purchase_order.make_purchase_receipt",
+	"erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "erpnext_utils.erpnext_utils.overrides.purchase_receipt.make_purchase_invoice"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

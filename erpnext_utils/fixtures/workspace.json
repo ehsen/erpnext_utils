@@ -89,5 +89,48 @@
    }
   ],
   "title": "Accounting Vouchers"
+ },
+ {
+  "charts": [],
+  "content": "[{\"id\":\"aSa-L43HPI\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Gate Entry Management</span>\",\"col\":12}},{\"id\":\"eIUn2UjFOy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\",\"col\":12}},{\"id\":\"r4rKgIcmOO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Gate Entry\",\"col\":3}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": null,
+  "indicator_color": "blue",
+  "is_hidden": 0,
+  "label": "Gate Entry Management",
+  "links": [],
+  "modified": "2024-12-19 10:00:00.000000",
+  "module": "ERPNext Utils",
+  "name": "Gate Entry Management",
+  "number_cards": [],
+  "parent_page": "Stock",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [],
+  "sequence_id": 50.0,
+  "shortcuts": [
+   {
+    "color": "Blue",
+    "doc_view": "New",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Gate Entry",
+    "link_to": "Gate Entry",
+    "parent": "Gate Entry Management",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": "[[\"Gate Entry\",\"docstatus\",\"=\",\"1\",false]]",
+    "type": "DocType",
+    "url": null
+   }
+  ],
+  "title": "Gate Entry Management"
  }
 ]
