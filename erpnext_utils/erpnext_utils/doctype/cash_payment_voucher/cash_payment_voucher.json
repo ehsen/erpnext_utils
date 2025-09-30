@@ -12,6 +12,7 @@
   "voucher_account",
   "cost_center",
   "import_document",
+  "import_charge_type",
   "abbr",
   "column_break_ywqs",
   "section_break_uezx",
@@ -119,12 +120,18 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "reqd": 1
+  },
+  {
+   "fieldname": "import_charge_type",
+   "fieldtype": "Link",
+   "label": "Import Charge Type",
+   "options": "Import Charge Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-25 11:38:37.585402",
+ "modified": "2025-09-30 14:29:16.763633",
  "modified_by": "Administrator",
  "module": "Erpnext Utils",
  "name": "Cash Payment Voucher",
