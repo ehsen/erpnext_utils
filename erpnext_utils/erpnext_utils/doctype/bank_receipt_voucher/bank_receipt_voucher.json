@@ -19,9 +19,11 @@
   "section_break_cheque",
   "cheque_number",
   "cheque_date",
+  "bank",
   "column_break_cheque_party",
   "party_type",
-  "party",
+  "received_from",
+  "received_from_name",
   "section_break_ipdv",
   "remarks",
   "accounts",
@@ -119,6 +121,14 @@
    "label": "Cheque Date"
   },
   {
+   "depends_on": "eval:doc.instrument_type==\"Cheque\"",
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
    "fieldname": "column_break_cheque_party",
    "fieldtype": "Column Break"
   },
@@ -131,10 +141,18 @@
   },
   {
    "depends_on": "eval:doc.instrument_type==\"Cheque\"",
-   "fieldname": "party",
+   "fieldname": "received_from",
    "fieldtype": "Dynamic Link",
-   "label": "Issued To",
+   "label": "Received From",
    "options": "party_type"
+  },
+  {
+   "depends_on": "eval:doc.instrument_type==\"Cheque\"",
+   "fieldname": "received_from_name",
+   "fieldtype": "Data",
+   "label": "Received From",
+   "read_only": 1,
+   "fetch_from": "received_from"
   },
   {
    "fieldname": "section_break_ipdv",

@@ -4,9 +4,9 @@ frappe.ui.form.on('Bank Receipt Voucher', {
         frm.set_query('voucher_account', function() {
             return {
                 filters: {
-                    account_type: 'Bank',
-                    is_group: 0,
-                    company: frm.doc.company
+                    is_company_account: 1,
+                    company: frm.doc.company,
+                    disabled: 0
                 }
             };
         });
@@ -41,6 +41,12 @@ frappe.ui.form.on('Voucher Account', {
         // Auto-populate cost_center when new row is added
         if (frm.doc.cost_center) {
             frappe.model.set_value(cdt, cdn, 'cost_center', frm.doc.cost_center);
+        }
+        
+        // Auto-populate party information for cheque receipts
+        if (frm.doc.instrument_type === "Cheque" && frm.doc.party_type && frm.doc.received_from) {
+            frappe.model.set_value(cdt, cdn, 'party_type', frm.doc.party_type);
+            frappe.model.set_value(cdt, cdn, 'party', frm.doc.received_from);
         }
     }
 });

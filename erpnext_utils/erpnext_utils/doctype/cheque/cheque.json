@@ -40,6 +40,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
@@ -52,8 +59,14 @@
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
-   "label": "Issued To",
+   "label": "Party",
    "options": "party_type"
+  },
+  {
+    "fieldname":"cheque_type",
+    "fieldtype":"Select",
+    "label":"Cheque Type",
+    "options":"Issued\nReceived"
   },
   {
    "default": "Today",

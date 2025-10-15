@@ -42,6 +42,7 @@ def create_gl_entries(
                 gl_entry.posting_date = posting_date or nowdate()
                 gl_entry.account = acc.account
                 gl_entry.debit = acc.get("amount", 0)  # For payment: amount = debit
+                gl_entry.debit_in_account_currency = acc.get("amount", 0) 
                 gl_entry.credit = 0
                 gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
                 gl_entry.party_type = acc.get("party_type")
@@ -49,7 +50,7 @@ def create_gl_entries(
                 gl_entry.company = company
                 gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
                 gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
-                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
                 try:
@@ -74,6 +75,7 @@ def create_gl_entries(
             gl_entry.account = voucher_account
             gl_entry.debit = 0
             gl_entry.credit = total_amount  # For payment: cash account is credited
+            gl_entry.credit_in_account_currency = total_amount
             gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
             gl_entry.party = None
@@ -99,13 +101,14 @@ def create_gl_entries(
                 gl_entry.account = acc.account
                 gl_entry.debit = 0
                 gl_entry.credit = acc.get("amount", 0)  # For receipt: amount = credit
+                gl_entry.credit_in_account_currency = acc.get("amount", 0)
                 gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
                 gl_entry.party_type = acc.get("party_type")
                 gl_entry.party = acc.get("party")
                 gl_entry.company = company
                 gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
                 gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
-                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
                 try:
@@ -129,6 +132,7 @@ def create_gl_entries(
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = total_amount  # For receipt: cash account is debited
+            gl_entry.debit_in_account_currency = total_amount
             gl_entry.credit = 0
             gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
@@ -154,6 +158,7 @@ def create_gl_entries(
                 gl_entry.posting_date = posting_date or nowdate()
                 gl_entry.account = acc.account
                 gl_entry.debit = acc.get("amount", 0)  # For bank payment: amount = debit
+                gl_entry.debit_in_account_currency = acc.get("amount", 0)
                 gl_entry.credit = 0
                 gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
                 gl_entry.party_type = acc.get("party_type")
@@ -161,7 +166,7 @@ def create_gl_entries(
                 gl_entry.company = company
                 gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
                 gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
-                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
                 try:
@@ -185,7 +190,9 @@ def create_gl_entries(
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = 0
+            gl_entry.debit_in_account_currency = 0
             gl_entry.credit = total_amount  # For bank payment: bank account is credited
+            gl_entry.credit_in_account_currency = total_amount
             gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
             gl_entry.party = None
@@ -210,14 +217,16 @@ def create_gl_entries(
                 gl_entry.posting_date = posting_date or nowdate()
                 gl_entry.account = acc.account
                 gl_entry.debit = 0
+                gl_entry.debit_in_account_currency = 0
                 gl_entry.credit = acc.get("amount", 0)  # For bank receipt: amount = credit
+                gl_entry.credit_in_account_currency = acc.get("amount", 0)
                 gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
                 gl_entry.party_type = acc.get("party_type")
                 gl_entry.party = acc.get("party")
                 gl_entry.company = company
                 gl_entry.voucher_type = voucher_doctype or acc.get("voucher_type", voucher_type)
                 gl_entry.voucher_no = voucher_no or acc.get("voucher_no")
-                gl_entry.voucher_subtype = acc.get("voucher_subtype")
+                gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
                 try:
@@ -241,6 +250,7 @@ def create_gl_entries(
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = voucher_account
             gl_entry.debit = total_amount  # For bank receipt: bank account is debited
+            gl_entry.debit_in_account_currency = total_amount
             gl_entry.credit = 0
             gl_entry.cost_center = voucher_cost_center
             gl_entry.party_type = None
@@ -263,7 +273,9 @@ def create_gl_entries(
             gl_entry.posting_date = posting_date or nowdate()
             gl_entry.account = acc.account
             gl_entry.debit = acc.get("debit", 0)
+            gl_entry.debit_in_account_currency = acc.get("debit", 0)
             gl_entry.credit = acc.get("credit", 0)
+            gl_entry.credit_in_account_currency = acc.get("credit", 0)
             gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
             gl_entry.party_type = acc.get("party_type")
             gl_entry.party = acc.get("party")
@@ -377,7 +389,9 @@ def create_single_gl_entry(doc, account, debit=0, credit=0, party_type=None,
     gl_entry.posting_date = doc.posting_date or doc.transaction_date
     gl_entry.account = account
     gl_entry.debit = flt(debit)
+    gl_entry.debit_in_account_currency = flt(debit)
     gl_entry.credit = flt(credit)
+    gl_entry.credit_in_account_currency = flt(credit)
     gl_entry.company = doc.company
     gl_entry.voucher_type = doc.doctype
     gl_entry.voucher_no = doc.name
@@ -434,10 +448,14 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
             
             if voucher_type in ["Bank Payment", "Payment"]:
                 gl_entry.debit = acc.get("amount", 0)
+                gl_entry.debit_in_account_currency = acc.get("amount", 0)
                 gl_entry.credit = 0
+                gl_entry.credit_in_account_currency = 0
             else:  # Bank Receipt, Receipt
                 gl_entry.debit = 0
+                gl_entry.debit_in_account_currency = 0
                 gl_entry.credit = acc.get("amount", 0)
+                gl_entry.credit_in_account_currency = acc.get("amount", 0)
             
             gl_entry.cost_center = acc.get("cost_center", get_default_cost_center(company))
             gl_entry.party_type = acc.get("party_type")
@@ -472,10 +490,14 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
         
         if voucher_type in ["Bank Payment", "Payment"]:
             gl_entry.debit = 0
+            gl_entry.debit_in_account_currency = 0
             gl_entry.credit = total_amount
+            gl_entry.credit_in_account_currency = total_amount
         else:  # Bank Receipt, Receipt
             gl_entry.debit = total_amount
+            gl_entry.debit_in_account_currency = total_amount
             gl_entry.credit = 0
+            gl_entry.credit_in_account_currency = 0
         
         gl_entry.cost_center = voucher_cost_center
         gl_entry.party_type = None
