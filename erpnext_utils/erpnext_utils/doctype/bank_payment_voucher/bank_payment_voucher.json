@@ -7,6 +7,9 @@
  "field_order": [
   "naming_series",
   "posting_date",
+  "import_document",
+  "import_charge_type",
+  "paid_to",
   "column_break_o3br",
   "company",
   "voucher_account",
@@ -42,6 +45,26 @@
    "in_list_view": 1,
    "label": "Posting Date",
    "reqd": 1
+  },
+  {
+    "fieldname": "import_document",
+   "fieldtype": "Link",
+   "label": "Import Document",
+   "options": "ImportDoc"
+  },
+  {
+    "depends_on": "eval:doc.import_document",
+    "fieldname": "import_charge_type",
+    "fieldtype": "Link",
+    "label": "Import Charge Type",
+    "options": "Import Charge Type"
+  },
+  {
+    "depends_on": "eval:doc.import_document",
+    "fieldname": "paid_to",
+    "fieldtype": "Data",
+    "label": "Paid To"
+    
   },
   {
    "fieldname": "column_break_o3br",
