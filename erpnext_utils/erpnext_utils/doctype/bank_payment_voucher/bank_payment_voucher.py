@@ -15,6 +15,10 @@ class BankPaymentVoucher(Document):
 		validate_accounts_child_table(self)
 		validate_accounting_equation(self)
 		self.total_payment = sum(flt(row.amount or 0) for row in self.accounts)
+
+		# Set gl_bank_account to voucher_account since both should be Account records
+		if self.voucher_account and not self.gl_bank_account:
+			self.gl_bank_account = self.voucher_account
 		
 		# Validate cheque details if instrument type is Cheque
 		if self.instrument_type == "Cheque":
@@ -38,9 +42,10 @@ class BankPaymentVoucher(Document):
 			# Check if it's a post dated cheque
 			if self.cheque_date > today():
 				# Create post dated cheque GL entries using gl_bank_account
-				from erpnext_utils.erpnext_utils.controllers.voucher_controller import create_post_dated_cheque_gl_entries
+				from erpnext_utils.erpnext_utils.controllers.voucher_controller import create_post_dated_cheque_gl_entries,get_post_dated_cheque_account
+				
 				create_post_dated_cheque_gl_entries(self.posting_date, self.accounts, self.company, 
-					"Bank Payment", self.gl_bank_account, "Bank Payment Voucher", self.name,
+					"Bank Payment", get_post_dated_cheque_account(), "Bank Payment Voucher", self.name,
 					self.cheque_date, self.cheque_number)
 			else:
 				# Create normal GL entries for current date cheques using gl_bank_account
@@ -59,17 +64,19 @@ class BankPaymentVoucher(Document):
 		cheque_doc.party_type = self.party_type
 		cheque_doc.party = self.party
 		cheque_doc.status = "Unpresented"
+		cheque_doc.cheque_type = "Issued"
 		cheque_doc.amount = self.total_payment
 		
 		# Use the validated cheque book
 		if hasattr(self, 'cheque_book_name') and self.cheque_book_name:
 			cheque_doc.cheque_book = self.cheque_book_name
 		else:
-			# Fallback: Try to find and link the cheque book using voucher_account
-			cheque_book = frappe.db.get_value("Cheque Book", 
-				{"bank_account": self.voucher_account, "is_active": 1}, "name")
-			if cheque_book:
-				cheque_doc.cheque_book = cheque_book
+			# Fallback: Try to find and link the cheque book using the Bank Account directly
+			if self.voucher_account:
+				cheque_book = frappe.db.get_value("Cheque Book",
+					{"bank_account": self.voucher_account, "is_active": 1}, "name")
+				if cheque_book:
+					cheque_doc.cheque_book = cheque_book
 		
 		# The bank_account field will be automatically fetched from cheque_book.bank_account
 		# due to the fetch_from configuration in the Cheque DocType
@@ -80,20 +87,32 @@ class BankPaymentVoucher(Document):
 		if not self.cheque_number or not self.voucher_account:
 			return
 		
-		# Find cheque book that matches the voucher_account (Bank Account) and contains the cheque number
-		cheque_book = frappe.db.get_value("Cheque Book", 
+		# voucher_account is the Bank Account name, not Account name
+		# We need to find the Bank Account record directly
+		bank_account = self.voucher_account
+
+		# Verify the Bank Account exists and is a company account
+		bank_account_doc = frappe.db.get_value("Bank Account",
+			{"name": bank_account, "is_company_account": 1}, 
+			["name", "account"], as_dict=True)
+
+		if not bank_account_doc:
+			frappe.throw(f"Bank Account '{bank_account}' not found or not a company account")
+
+		# Find cheque book that matches the Bank Account and contains the cheque number
+		cheque_book = frappe.db.get_value("Cheque Book",
 			{
-				"bank_account": self.voucher_account,
+				"bank_account": bank_account,
 				"is_active": 1,
 				"start_series": ["<=", self.cheque_number],
 				"end_series": [">=", self.cheque_number]
-			}, 
-			["name", "start_series", "end_series", "current_series"], 
+			},
+			["name", "start_series", "end_series", "current_series"],
 			as_dict=True
 		)
 		
 		if not cheque_book:
-			frappe.throw(f"No active cheque book found for Bank Account '{self.voucher_account}' containing cheque number '{self.cheque_number}'")
+			frappe.throw(f"No active cheque book found for Bank Account '{bank_account}' containing cheque number '{self.cheque_number}'")
 		
 		# Check if cheque number is already used
 		existing_cheque = frappe.db.exists("Cheque", {
@@ -106,3 +125,5 @@ class BankPaymentVoucher(Document):
 		
 		# Store the cheque book name for later use
 		self.cheque_book_name = cheque_book.name
+		# Also store the bank account for reference
+		self.bank_account_name = bank_account

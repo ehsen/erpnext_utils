@@ -5,7 +5,8 @@ frappe.ui.form.on('Bank Payment Voucher', {
             return {
                 filters: {
                     is_company_account: 1,
-                    company: frm.doc.company
+                    company: frm.doc.company,
+                    disabled: 0
                 }
             };
         });

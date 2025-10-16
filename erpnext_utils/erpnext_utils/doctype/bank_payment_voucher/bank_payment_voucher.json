@@ -7,6 +7,9 @@
  "field_order": [
   "naming_series",
   "posting_date",
+  "import_document",
+  "import_charge_type",
+  "paid_to",
   "column_break_o3br",
   "company",
   "voucher_account",
@@ -44,6 +47,26 @@
    "reqd": 1
   },
   {
+    "fieldname": "import_document",
+   "fieldtype": "Link",
+   "label": "Import Document",
+   "options": "ImportDoc"
+  },
+  {
+    "depends_on": "eval:doc.import_document",
+    "fieldname": "import_charge_type",
+    "fieldtype": "Link",
+    "label": "Import Charge Type",
+    "options": "Import Charge Type"
+  },
+  {
+    "depends_on": "eval:doc.import_document",
+    "fieldname": "paid_to",
+    "fieldtype": "Data",
+    "label": "Paid To"
+    
+  },
+  {
    "fieldname": "column_break_o3br",
    "fieldtype": "Column Break"
   },
@@ -59,16 +82,17 @@
    "fieldname": "voucher_account",
    "fieldtype": "Link",
    "label": "Bank Account",
-   "options": "Account",
+   "options": "Bank Account",
    "reqd": 1
-  },  {
-    "fieldname": "gl_bank_account",
-    "fieldtype": "Link",
-    "label": "GL Bank Account",
-    "options": "Account",
-    "fetch_from": "voucher_account.account",
-    "read_only": 1
-   },
+  },
+  {
+   "fieldname": "gl_bank_account",
+   "fieldtype": "Link",
+   "label": "GL Bank Account",
+   "options": "Account",
+   "fetch_from": "voucher_account.account",
+   "read_only": 1
+  },
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
