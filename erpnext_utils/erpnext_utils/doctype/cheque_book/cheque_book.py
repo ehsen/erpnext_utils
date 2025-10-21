@@ -37,14 +37,34 @@ class ChequeBook(Document):
 			frappe.throw("Series fields must contain only numeric values")
 	
 	def get_next_cheque_number(self):
-		"""Get the next available cheque number"""
-		current_series = int(self.current_series)
-		end_series = int(self.end_series)
+		"""Get the next available cheque number as a string.
+
+		Preserves formatting (e.g. leading zeros) to match the cheque number
+		series width defined by the configured range.
+		"""
+		# Determine the target width based on the configured range bounds
+		width = max(len(str(self.start_series or "")), len(str(self.end_series or "")))
+
+		# Work with integers for bounds checking, but preserve string formatting for return
+		current_series_str = str(self.current_series)
+		current_series_int = int(current_series_str)
+		end_series_int = int(self.end_series)
 		
-		if current_series > end_series:
-			frappe.throw(f"No more cheques available in this cheque book. Last cheque number: {self.end_series}")
+		if current_series_int > end_series_int:
+			frappe.throw(
+				f"No more cheques available in this cheque book. Last cheque number: {self.end_series}"
+			)
 		
-		next_number = current_series
-		self.current_series = str(current_series + 1)
+		# Return the current cheque number as a zero-padded string (if width known)
+		next_number_str = (
+			str(current_series_int).zfill(width) if width else current_series_str
+		)
+
+		# Increment and persist the next current_series, preserving width
+		self.current_series = (
+			str(current_series_int + 1).zfill(width)
+			if width
+			else str(current_series_int + 1)
+		)
 		self.save()
-		return next_number
+		return next_number_str
