@@ -22,6 +22,7 @@
   "module": "Erpnext Utils",
   "name": "Cash Payment Voucher - Half Page",
   "page_number": null,
+  "pdf_generator": null,
   "print_format_builder": 0,
   "print_format_builder_beta": 0,
   "print_format_type": "Jinja",
@@ -53,13 +54,14 @@
   "module": "ERPNext Utils",
   "name": "Gate Entry - Half Page",
   "page_number": null,
+  "pdf_generator": null,
   "print_format_builder": 0,
   "print_format_builder_beta": 0,
   "print_format_type": "Jinja",
   "raw_commands": null,
   "raw_printing": 0,
- "show_section_headings": 0,
- "standard": "No"
+  "show_section_headings": 0,
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -84,13 +86,14 @@
   "module": "ERPNext Utils",
   "name": "Delivery Note - Simple Format",
   "page_number": null,
+  "pdf_generator": null,
   "print_format_builder": 0,
   "print_format_builder_beta": 0,
   "print_format_type": "Jinja",
   "raw_commands": null,
   "raw_printing": 0,
- "show_section_headings": 0,
- "standard": "No"
+  "show_section_headings": 0,
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -115,13 +118,14 @@
   "module": "ERPNext Utils",
   "name": "Work Order - Standard Format",
   "page_number": null,
+  "pdf_generator": null,
   "print_format_builder": 0,
   "print_format_builder_beta": 0,
   "print_format_type": "Jinja",
   "raw_commands": null,
   "raw_printing": 0,
- "show_section_headings": 0,
- "standard": "No"
+  "show_section_headings": 0,
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -146,6 +150,7 @@
   "module": "ERPNext Utils",
   "name": "Stock Entry - Standard Format",
   "page_number": null,
+  "pdf_generator": null,
   "print_format_builder": 0,
   "print_format_builder_beta": 0,
   "print_format_type": "Jinja",

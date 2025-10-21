@@ -43,19 +43,19 @@
   },
   {
    "fieldname": "start_series",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Start Series",
    "reqd": 1
   },
   {
    "fieldname": "end_series",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "End Series",
    "reqd": 1
   },
   {
    "fieldname": "current_series",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Current Series",
    "read_only": 1
   },
