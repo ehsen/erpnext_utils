@@ -20,7 +20,7 @@
  "fields": [
   {
    "fieldname": "cheque_number",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Cheque Number",
    "reqd": 1,
    "unique": 1
