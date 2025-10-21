@@ -37,14 +37,30 @@ class ChequeBook(Document):
 			frappe.throw("Series fields must contain only numeric values")
 	
 	def get_next_cheque_number(self):
-		"""Get the next available cheque number"""
-		current_series = int(self.current_series)
-		end_series = int(self.end_series)
+		"""Get the next cheque number and increment current series"""
+		if not self.current_series:
+			frappe.throw("Current series is not set")
 		
-		if current_series > end_series:
-			frappe.throw(f"No more cheques available in this cheque book. Last cheque number: {self.end_series}")
+		# Store the current cheque number to return
+		current_cheque_number = str(self.current_series)
 		
-		next_number = current_series
-		self.current_series = str(current_series + 1)
+		# Convert to integers for calculation
+		current_int = int(self.current_series)
+		end_int = int(self.end_series)
+		
+		# Check if we've reached the end of the series
+		if current_int >= end_int:
+			frappe.throw(f"Cheque series has reached the end. Current: {current_int}, End: {end_int}")
+		
+		# Increment current series for next call
+		next_int = current_int + 1
+		
+		# Preserve original formatting by padding with zeros if needed
+		original_length = len(str(self.start_series))
+		self.current_series = str(next_int).zfill(original_length)
+		
+		# Save the document to persist the updated current_series
 		self.save()
-		return next_number
+		
+		return current_cheque_number
+	
