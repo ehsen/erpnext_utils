@@ -54,6 +54,7 @@ def create_gl_entries(
                 gl_entry.against = voucher_account
 
                 try:
+                    gl_entry.flags.ignore_permissions = 1
                     gl_entry.insert()
                     gl_entries.append(gl_entry)
                 except Exception as e:
@@ -86,6 +87,7 @@ def create_gl_entries(
             gl_entry.against = against_accounts
 
             try:
+                gl_entry.flags.ignore_permissions = 1
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
@@ -112,6 +114,7 @@ def create_gl_entries(
                 gl_entry.against = voucher_account
 
                 try:
+                    gl_entry.flags.ignore_permissions = 1
                     gl_entry.insert()
                     gl_entries.append(gl_entry)
                 except Exception as e:
@@ -144,6 +147,7 @@ def create_gl_entries(
             gl_entry.against = against_accounts
 
             try:
+                gl_entry.flags.ignore_permissions = 1
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
@@ -170,6 +174,7 @@ def create_gl_entries(
                 gl_entry.against = voucher_account
 
                 try:
+                    gl_entry.flags.ignore_permissions = 1
                     gl_entry.insert()
                     gl_entries.append(gl_entry)
                 except Exception as e:
@@ -203,6 +208,7 @@ def create_gl_entries(
             gl_entry.against = against_accounts
 
             try:
+                gl_entry.flags.ignore_permissions = 1
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
@@ -230,6 +236,7 @@ def create_gl_entries(
                 gl_entry.against = voucher_account
 
                 try:
+                    gl_entry.flags.ignore_permissions = 1
                     gl_entry.insert()
                     gl_entries.append(gl_entry)
                 except Exception as e:
@@ -262,6 +269,7 @@ def create_gl_entries(
             gl_entry.against = against_accounts
 
             try:
+                gl_entry.flags.ignore_permissions = 1
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
@@ -286,6 +294,7 @@ def create_gl_entries(
             gl_entry.against = acc.get("against")
 
             try:
+                gl_entry.flags.ignore_permissions = 1
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
@@ -408,6 +417,7 @@ def create_single_gl_entry(doc, account, debit=0, credit=0, party_type=None,
                            get_default_cost_center(doc.company))
     
     try:
+        gl_entry.flags.ignore_permissions = 1
         gl_entry.insert()
         return gl_entry.name
     except Exception as e:
@@ -468,6 +478,7 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
             gl_entry.remarks = f"Post Dated Cheque #{cheque_number} dated {cheque_date}"
 
             try:
+                gl_entry.flags.ignore_permissions = 1
                 gl_entry.insert()
                 gl_entries.append(gl_entry)
             except Exception as e:
@@ -510,6 +521,7 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
         gl_entry.remarks = f"Post Dated Cheque #{cheque_number} dated {cheque_date}"
 
         try:
+            gl_entry.flags.ignore_permissions = 1
             gl_entry.insert()
             gl_entries.append(gl_entry)
         except Exception as e:

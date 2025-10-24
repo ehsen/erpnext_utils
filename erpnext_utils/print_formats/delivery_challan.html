@@ -1,0 +1,79 @@
+<div class="do-print-wrap">
+  <div class="half-a4" style="width: 100%; height: auto; padding: 15px 20px; font-family: Arial, sans-serif; font-size: 11px; box-sizing: border-box; position: relative;">
+
+    <!-- Header -->
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <!-- Centered Title and Customer Info -->
+        <td style="text-align: center; vertical-align: top;">
+          <h3 style="margin: 0 0 10px 0; font-size: 18px;">DELIVERY CHALLAN</h3>
+          
+          <p style="margin: 2px 0;"><strong>DC No.:</strong> {{ doc.name }}</p>
+          <p style="margin: 2px 0;"><strong>Issue Date:</strong> {{ frappe.utils.format_date(doc.posting_date, "dd-MM-yyyy") }}</p>
+          
+          <!-- Customer Box -->
+          <div style="border: 1px solid #000; padding: 6px; margin-top: 10px; font-weight: bold; text-align: center; display: inline-block; min-width: 300px;">
+            <span style="font-size: 10px;">Customer:</span><br />
+            <span style="font-size: 15px;">{{ doc.customer_name or doc.customer }}</span>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <hr style="margin: 6px 0 10px 0; border-top: 1px solid #000;" />
+    <span style="font-size: 13px; font-weight:bold">Please receive the following items in good condition.</span><br />
+    
+    <!-- Items Table -->
+    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px;" border="1">
+      <thead>
+        <tr>
+          <th style="text-align: center; width: 5%; color: #000; font-weight: bold;">#</th>
+          <th style="text-align: left; color: #000; font-weight: bold;">ITEM</th>
+          <th style="text-align: right; color: #000; font-weight: bold;">QUANTITY</th>
+          <th style="text-align: right; color: #000; font-weight: bold;">RATE</th>
+          <th style="text-align: right; color: #000; font-weight: bold;">AMOUNT</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in doc.items %}
+        <tr>
+          <td style="text-align: center;">{{ loop.index }}</td>
+          <td style="padding-left: 4px;">
+            <div style="font-weight: bold;">{{ item.item_code }}</div>
+            <div style="font-size: 10px;">{{ item.item_name }}</div>
+          </td>
+          <td style="text-align: right; padding-right: 4px;">{{ item.qty|round(2) }} {{ item.uom }}</td>
+          <td style="text-align: right; padding-right: 4px;">{{ frappe.utils.fmt_money(item.rate or 0, currency=doc.currency) }}</td>
+          <td style="text-align: right; padding-right: 4px;">{{ frappe.utils.fmt_money(item.amount or 0, currency=doc.currency) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Signature + Note Fixed at Bottom -->
+    <div style="margin-top: 15px;">
+      <!-- Signature Box -->
+      <div style="border: 1px solid #000;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="width: 33.33%; border: 1px solid #000; text-align: left; padding: 6px; font-size: 10px;"><strong>Prepared By</strong></td>
+            <td style="width: 33.33%; border: 1px solid #000; text-align: left; padding: 6px; font-size: 10px;"><strong>Approved By</strong></td>
+            <td style="width: 33.34%; border: 1px solid #000; text-align: left; padding: 6px; font-size: 10px;"><strong>Received By</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="border: 1px solid #000; text-align: right; padding: 4px;">
+              <strong>Total: {{ frappe.utils.fmt_money(doc.total or 0, currency=doc.currency) }}</strong>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Note Section -->
+      <div style="margin-top: 6px; font-size: 11px; text-align: left;">
+        <span><strong>Note: Please check the contents of the above supplied goods before using the same.
+        </br>Thank you for your visit</strong></span>
+      </div>
+    </div>
+
+  </div>
+</div>
