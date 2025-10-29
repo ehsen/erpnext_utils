@@ -178,6 +178,15 @@ override_whitelisted_methods = {
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "erpnext_utils.erpnext_utils.overrides.purchase_order.make_purchase_receipt",
 	"erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "erpnext_utils.erpnext_utils.overrides.purchase_receipt.make_purchase_invoice"
 }
+
+# Document Events
+# ---------------
+doc_events = {
+	"Payment Entry": {
+		"validate": "erpnext_utils.erpnext_utils.overrides.payment_entry.validate_cheque_details",
+		"on_submit": "erpnext_utils.erpnext_utils.overrides.payment_entry.on_submit_cheque_creation"
+	}
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
