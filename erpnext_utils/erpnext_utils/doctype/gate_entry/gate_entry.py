@@ -127,7 +127,7 @@ def make_purchase_order_from_gate_entry(source_name, target_doc=None):
 					["uom", "uom"],
 					["material_request", "material_request"],
         			["material_request_item", "material_request_item"],
-					["custom_gate_entry": "gate_entry"],
+					["custom_gate_entry", "gate_entry"],
 					["custom_gate_entry_item", "gate_entry_item"],
 				],
 				"condition": select_item,
