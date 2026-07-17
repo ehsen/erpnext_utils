@@ -22,6 +22,14 @@ class CashPaymentVoucher(Document):
 		create_gl_entries(self.posting_date,self.accounts,self.company,"Payment",
 					self.voucher_account,"Cash Payment Voucher",self.name)
 
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+		
+		# Reverse GL entries
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+
+
 		
 		
 	
