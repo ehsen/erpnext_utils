@@ -9,6 +9,7 @@
   "posting_date",
   "import_document",
   "import_charge_type",
+  "letter_of_credit",
   "paid_to",
   "column_break_o3br",
   "company",
@@ -61,10 +62,17 @@
   },
   {
     "depends_on": "eval:doc.import_document",
+    "fieldname": "letter_of_credit",
+    "fieldtype": "Link",
+    "label": "Letter Of Credit",
+    "options": "Letter Of Credit"
+  },
+  {
+    "depends_on": "eval:doc.import_document",
     "fieldname": "paid_to",
     "fieldtype": "Data",
     "label": "Paid To"
-    
+
   },
   {
    "fieldname": "column_break_o3br",
