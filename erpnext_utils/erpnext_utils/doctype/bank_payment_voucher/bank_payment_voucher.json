@@ -55,6 +55,7 @@
   },
   {
     "depends_on": "eval:doc.import_document",
+    "mandatory_depends_on": "eval:doc.import_document",
     "fieldname": "import_charge_type",
     "fieldtype": "Link",
     "label": "Import Charge Type",

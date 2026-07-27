@@ -13,6 +13,7 @@
   "cost_center",
   "import_document",
   "import_charge_type",
+  "letter_of_credit",
   "abbr",
   "column_break_ywqs",
   "section_break_uezx",
@@ -122,10 +123,19 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.import_document",
+   "mandatory_depends_on": "eval:doc.import_document",
    "fieldname": "import_charge_type",
    "fieldtype": "Link",
    "label": "Import Charge Type",
    "options": "Import Charge Type"
+  },
+  {
+   "depends_on": "eval:doc.import_document",
+   "fieldname": "letter_of_credit",
+   "fieldtype": "Link",
+   "label": "Letter Of Credit",
+   "options": "Letter Of Credit"
   }
  ],
  "index_web_pages_for_search": 1,
