@@ -92,7 +92,8 @@
     "url": null
    }
   ],
-  "title": "Accounting Vouchers"
+  "title": "Accounting Vouchers",
+  "type": "Workspace"
  },
  {
   "charts": [],
@@ -136,6 +137,7 @@
     "url": null
    }
   ],
-  "title": "Gate Entry Management"
+  "title": "Gate Entry Management",
+  "type": "Workspace"
  }
 ]
