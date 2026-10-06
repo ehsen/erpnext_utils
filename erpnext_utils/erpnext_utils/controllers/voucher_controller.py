@@ -1,6 +1,63 @@
+import functools
+
 import frappe
 from frappe.utils import nowdate,flt
 from erpnext import get_default_cost_center
+
+
+def post_gl_entry(gl_entry, gl_entries):
+    """
+    Insert one GL Entry and record it in gl_entries.
+
+    Errors must propagate: ERPNext's GL Entry validation (party required on
+    Receivable/Payable accounts, party only on party accounts, frozen or
+    closed periods, ...) is the only check on these lines, so a swallowed
+    error means a one-sided posting.
+    """
+    gl_entry.flags.ignore_permissions = 1
+    gl_entry.insert()
+    gl_entries.append(gl_entry)
+
+
+def atomic_gl_posting(fn):
+    """
+    Make a voucher posting all-or-nothing and prove it balances.
+
+    The posting runs inside a savepoint that is rolled back, and the error
+    re-raised, if any line fails. After posting, total debit must equal total
+    credit for the entries this call wrote, otherwise the whole posting is
+    rolled back and the submit fails.
+    """
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        savepoint = "voucher_gl_" + frappe.generate_hash(length=8)
+        frappe.db.savepoint(savepoint)
+        try:
+            names = fn(*args, **kwargs)
+            assert_gl_entries_balanced(names)
+        except Exception:
+            frappe.db.rollback(save_point=savepoint)
+            raise
+        return names
+
+    return wrapper
+
+
+def assert_gl_entries_balanced(names):
+    if not names:
+        frappe.throw("No GL Entries were posted for this voucher")
+
+    totals = frappe.db.sql(
+        "select sum(debit) as debit, sum(credit) as credit from `tabGL Entry` where name in %(names)s",
+        {"names": tuple(names)},
+        as_dict=True,
+    )[0]
+    precision = frappe.get_precision("GL Entry", "debit") or 2
+    debit, credit = flt(totals.debit, precision), flt(totals.credit, precision)
+    if debit != credit:
+        frappe.throw(
+            f"GL posting is out of balance: total debit {debit} does not equal total credit {credit}"
+        )
 
 
 def get_voucher_accounts_total(doc):
@@ -18,6 +75,7 @@ def get_against_account_str(accounts):
     against_account = ",".join(acc.account for acc in accounts)
         
     
+@atomic_gl_posting
 def create_gl_entries(
     posting_date,
     accounts,
@@ -53,12 +111,7 @@ def create_gl_entries(
                 gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
-                try:
-                    gl_entry.flags.ignore_permissions = 1
-                    gl_entry.insert()
-                    gl_entries.append(gl_entry)
-                except Exception as e:
-                    frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+                post_gl_entry(gl_entry, gl_entries)
         
         if voucher_account:
             # Get against accounts for cash account GL entry
@@ -86,12 +139,7 @@ def create_gl_entries(
             gl_entry.voucher_subtype = voucher_doctype
             gl_entry.against = against_accounts
 
-            try:
-                gl_entry.flags.ignore_permissions = 1
-                gl_entry.insert()
-                gl_entries.append(gl_entry)
-            except Exception as e:
-                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+            post_gl_entry(gl_entry, gl_entries)
 
     elif voucher_type == "Receipt":
         total_amount = sum(acc.get("amount", 0) for acc in accounts)
@@ -113,12 +161,7 @@ def create_gl_entries(
                 gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
-                try:
-                    gl_entry.flags.ignore_permissions = 1
-                    gl_entry.insert()
-                    gl_entries.append(gl_entry)
-                except Exception as e:
-                    frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+                post_gl_entry(gl_entry, gl_entries)
 
         if voucher_account:
             # Get against accounts for cash account GL entry
@@ -146,12 +189,7 @@ def create_gl_entries(
             gl_entry.voucher_subtype = voucher_doctype
             gl_entry.against = against_accounts
 
-            try:
-                gl_entry.flags.ignore_permissions = 1
-                gl_entry.insert()
-                gl_entries.append(gl_entry)
-            except Exception as e:
-                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+            post_gl_entry(gl_entry, gl_entries)
 
     elif voucher_type == "Bank Payment":
         total_amount = sum(acc.get("amount", 0) for acc in accounts)
@@ -173,12 +211,7 @@ def create_gl_entries(
                 gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
-                try:
-                    gl_entry.flags.ignore_permissions = 1
-                    gl_entry.insert()
-                    gl_entries.append(gl_entry)
-                except Exception as e:
-                    frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+                post_gl_entry(gl_entry, gl_entries)
         
         if voucher_account:
             # Get against accounts for bank account GL entry
@@ -207,12 +240,7 @@ def create_gl_entries(
             gl_entry.voucher_subtype = voucher_doctype
             gl_entry.against = against_accounts
 
-            try:
-                gl_entry.flags.ignore_permissions = 1
-                gl_entry.insert()
-                gl_entries.append(gl_entry)
-            except Exception as e:
-                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+            post_gl_entry(gl_entry, gl_entries)
 
     elif voucher_type == "Bank Receipt":
         total_amount = sum(acc.get("amount", 0) for acc in accounts)
@@ -235,12 +263,7 @@ def create_gl_entries(
                 gl_entry.voucher_subtype = voucher_doctype
                 gl_entry.against = voucher_account
 
-                try:
-                    gl_entry.flags.ignore_permissions = 1
-                    gl_entry.insert()
-                    gl_entries.append(gl_entry)
-                except Exception as e:
-                    frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+                post_gl_entry(gl_entry, gl_entries)
 
         if voucher_account:
             # Get against accounts for bank account GL entry
@@ -268,12 +291,7 @@ def create_gl_entries(
             gl_entry.voucher_subtype = voucher_doctype
             gl_entry.against = against_accounts
 
-            try:
-                gl_entry.flags.ignore_permissions = 1
-                gl_entry.insert()
-                gl_entries.append(gl_entry)
-            except Exception as e:
-                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+            post_gl_entry(gl_entry, gl_entries)
 
     else:
         for acc in accounts:
@@ -293,12 +311,7 @@ def create_gl_entries(
             gl_entry.voucher_subtype = acc.get("voucher_subtype")
             gl_entry.against = acc.get("against")
 
-            try:
-                gl_entry.flags.ignore_permissions = 1
-                gl_entry.insert()
-                gl_entries.append(gl_entry)
-            except Exception as e:
-                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+            post_gl_entry(gl_entry, gl_entries)
 
     return [entry.name for entry in gl_entries]
 
@@ -427,13 +440,13 @@ def create_single_gl_entry(doc, account, debit=0, credit=0, party_type=None,
 
 def get_post_dated_cheque_account():
     """Get the default post dated cheque account from Voucher Settings"""
-    try:
-        voucher_settings = frappe.get_single("Voucher Settings")
-        return voucher_settings.default_post_dated_cheque
-    except:
+    account = frappe.db.get_single_value("Voucher Settings", "default_post_dated_cheque")
+    if not account:
         frappe.throw("Please set Default Post Dated Cheque Account in Voucher Settings")
+    return account
 
 
+@atomic_gl_posting
 def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher_type, 
                                        voucher_account, voucher_doctype, voucher_no, 
                                        cheque_date, cheque_number):
@@ -477,12 +490,7 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
             gl_entry.against = post_dated_account
             gl_entry.remarks = f"Post Dated Cheque #{cheque_number} dated {cheque_date}"
 
-            try:
-                gl_entry.flags.ignore_permissions = 1
-                gl_entry.insert()
-                gl_entries.append(gl_entry)
-            except Exception as e:
-                frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+            post_gl_entry(gl_entry, gl_entries)
     
     # Create entry for post dated cheque account
     if post_dated_account:
@@ -520,12 +528,7 @@ def create_post_dated_cheque_gl_entries(posting_date, accounts, company, voucher
         gl_entry.against = against_accounts
         gl_entry.remarks = f"Post Dated Cheque #{cheque_number} dated {cheque_date}"
 
-        try:
-            gl_entry.flags.ignore_permissions = 1
-            gl_entry.insert()
-            gl_entries.append(gl_entry)
-        except Exception as e:
-            frappe.log_error(f"Error inserting GL Entry: {str(e)}", "GL Entry Insertion Error")
+        post_gl_entry(gl_entry, gl_entries)
     
     return [entry.name for entry in gl_entries]
 
