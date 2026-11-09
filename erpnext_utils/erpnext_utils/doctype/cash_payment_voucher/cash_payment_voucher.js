@@ -10,6 +10,20 @@ frappe.ui.form.on('Cash Payment Voucher', {
                 }
             };
         });
+
+        // Only submitted LCs belonging to the selected Import Document are selectable
+        frm.set_query('letter_of_credit', function() {
+            return {
+                filters: {
+                    docstatus: 1,
+                    import_document: frm.doc.import_document
+                }
+            };
+        });
+    },
+
+    import_document: function(frm) {
+        frm.set_value('letter_of_credit', '');
     },
 
     onload: function(frm) {

@@ -56,6 +56,19 @@ class BankPaymentVoucher(Document):
 			create_gl_entries(self.posting_date, self.accounts, self.company, "Bank Payment",
 					self.gl_bank_account, "Bank Payment Voucher", self.name)
 
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+		
+		# Reverse GL entries
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		
+		# Cancel associated Cheque document
+		if self.instrument_type == "Cheque" and self.cheque_number:
+			if frappe.db.exists("Cheque", self.cheque_number):
+				frappe.db.set_value("Cheque", self.cheque_number, "status", "Cancelled")
+
+
 	def create_cheque_record(self):
 		"""Create cheque record for cheque payments"""
 		cheque_doc = frappe.new_doc("Cheque")

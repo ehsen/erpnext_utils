@@ -57,5 +57,6 @@
    "type": "DocType"
   }
  ],
- "title": "Accounting Vouchers"
+ "title": "Accounting Vouchers",
+ "type": "Workspace"
 }
