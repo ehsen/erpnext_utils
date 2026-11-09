@@ -5,6 +5,10 @@ from frappe.utils import nowdate,flt
 from erpnext import get_default_cost_center
 
 
+# Account types ERPNext allows a party on (see validate_account_party_type)
+PARTY_ACCOUNT_TYPES = ("Receivable", "Payable", "Equity")
+
+
 def post_gl_entry(gl_entry, gl_entries):
     """
     Insert one GL Entry and record it in gl_entries.
@@ -367,6 +371,16 @@ def validate_account_row(row, row_idx):
     if row.party_type and row.party:
         if not frappe.db.exists(row.party_type, row.party):
             frappe.throw(f"Row {row_idx}: {row.party_type} '{row.party}' does not exist")
+
+        # Mirror ERPNext's GL Entry rule (erpnext.accounts.party.validate_account_party_type)
+        # so the bad line is rejected on save instead of failing at submit.
+        account_type = frappe.get_cached_value("Account", row.account, "account_type")
+        if account_type and account_type not in PARTY_ACCOUNT_TYPES:
+            frappe.throw(
+                f"Row {row_idx}: {row.party_type} '{row.party}' cannot be used with account "
+                f"{row.account} (account type {account_type}). Party can only be set for "
+                f"Receivable / Payable accounts; clear Party Type and Party on this row."
+            )
     
    
 

@@ -158,17 +158,33 @@ class TestVoucherGLPosting(IntegrationTestCase):
 					voucher.submit()
 				self.assert_not_submitted_and_unposted(voucher)
 
-	def test_case_b_party_on_non_party_account_blocks_submit(self):
+	def test_case_b_party_on_non_party_account_is_rejected_on_save(self):
+		# BFI-CP-2026-2027-0003: Supplier party on a typed Expense account must be refused at
+		# validate, before anything can be submitted one-sided.
+		for doctype in VOUCHER_DOCTYPES:
+			with self.subTest(doctype=doctype):
+				with self.assertRaisesRegex(frappe.ValidationError, "Row 1: Supplier .* cannot be used with account"):
+					self.make_voucher(doctype, [self.row(self.typed_expense, 23_000, "Supplier", self.supplier)])
+
+	def test_party_on_untyped_account_still_posts_balanced(self):
+		# ERPNext accepts a party on an account with no account_type (e.g. Employee on Legal Expenses).
 		for doctype in VOUCHER_DOCTYPES:
 			with self.subTest(doctype=doctype):
 				voucher = self.make_voucher(
-					doctype, [self.row(self.typed_expense, 23_000, "Supplier", self.supplier)]
+					doctype, [self.row(self.plain_expense, 7_000, "Supplier", self.supplier)]
 				)
-				with self.assertRaisesRegex(
-					frappe.ValidationError, "Party Type and Party can only be set for Receivable / Payable"
-				):
-					voucher.submit()
-				self.assert_not_submitted_and_unposted(voucher)
+				voucher.submit()
+				self.assertEqual(voucher.docstatus, 1)
+				self.assert_balanced(voucher, 2)
+
+	def test_party_on_payable_account_is_accepted(self):
+		for doctype in VOUCHER_DOCTYPES:
+			with self.subTest(doctype=doctype):
+				voucher = self.make_voucher(
+					doctype, [self.row(self.payable_asset, 3_000, "Supplier", self.supplier)]
+				)
+				voucher.submit()
+				self.assert_balanced(voucher, 2)
 
 	def test_failure_on_later_line_leaves_no_gl_rows(self):
 		# Row 1 is valid and posts before row 2 fails; nothing may remain, bank leg included.
